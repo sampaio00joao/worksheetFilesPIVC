@@ -91,7 +91,7 @@ Mat exercise3_ws3(int kernelSize, int sigma){
 	int w = kernelSize / 2;
 
 	// CV_64F = double in cpp
-	Mat Gauss(kernelSize, kernelSize, CV_64F, Scalar(0));
+	Mat Gauss(kernelSize, kernelSize, CV_32F, Scalar(0));
 
 	// Fill the kernel using the Gaussian formula
 	for (int i = -w; i <= w; i++) {
@@ -99,11 +99,11 @@ Mat exercise3_ws3(int kernelSize, int sigma){
 			double value = (1 / (2 * 3.14 * sigma * sigma)) *
 				exp(-((i * i + j * j) / (2 * sigma * sigma))); // gaussian formula
 			// the value is applied to the matrix created
-			Gauss.at<double>(i + w, j + w) = value; 
+			Gauss.at<float>(i + w, j + w) = value; 
 		}
 	}
 	// Normalize the kernel
-	Gauss /= sum(Gauss)[0]; // Normalize so the sum of all elements equals 1
+	//Gauss /= sum(Gauss)[0]; // Normalize so the sum of all elements equals 1
 	
 	return Gauss;
 }
@@ -111,38 +111,33 @@ Mat exercise3_ws3(int kernelSize, int sigma){
 void exercise4_ws3(const string& imagePath, const string& imageName, Mat kernel, int kernelSize) {
 
 	Mat image = imread(imagePath, IMREAD_GRAYSCALE);
+
 	Mat paddedImage;
-	int pad = kernelSize / 2; // pad is equal to the kernel/2 
-	// Create a padded image
-	copyMakeBorder(image, paddedImage, pad, pad, pad, pad, BORDER_CONSTANT);
+	int pad = kernelSize / 2;
+	copyMakeBorder(image, paddedImage, pad, pad, pad, pad, BORDER_CONSTANT, Scalar(0));
 
-	// 1 channel image to serve as final reference
-	Mat filterImage(image.rows, image.cols, CV_8UC1, Scalar(0));
+	Mat filterImage(image.rows, image.cols, CV_32F, Scalar(0)); // Ensure float type
 
-	// Loop through each pixel of the padded image, excluding the padding borders.
 	for (int r = pad; r < paddedImage.rows - pad; r++) {
 		for (int c = pad; c < paddedImage.cols - pad; c++) {
-			double sum = 0; // Change to double to match kernel type
-			// Loop through the kernel region centered at (r, c)
-			// Accumulate the sum of all pixel intensities in the kernel.
-			for (int kx = -pad; kx <= pad; kx++) { // Go through x 
-				for (int ky = -pad; ky <= pad; ky++) { // Go through y
-					// Correct data type: access kernel as double
-					double kernelValue = kernel.at<double>(kx + pad, ky + pad); // Use CV_64F type
-					uchar pixelValue = paddedImage.at<uchar>(r + kx, c + ky);
+			float sum = 0.0;
 
-					// Multiply and accumulate the result / Convolve
-					sum += static_cast<double>(pixelValue) * kernelValue;
+			for (int kx = -pad; kx <= pad; kx++) {
+				for (int ky = -pad; ky <= pad; ky++) {
+					float kernelValue = kernel.at<float>(kx + pad, ky + pad);
+					float pixelValue = (float)paddedImage.at<uchar>(r + kx, c + ky);
+					sum += static_cast<float>(pixelValue) * kernelValue;
 				}
 			}
-			// Assign the result to the output image pixels (without padding)
-			filterImage.at<uchar>(r - pad, c - pad) = static_cast<uchar>(round(sum));
+			filterImage.at<float>(r - pad, c - pad) = sum;
 		}
 	}
 
-	// join the images in an imshow
+	Mat displayImage;
+	filterImage.convertTo(displayImage, CV_8U); // Convert for display
+
 	Mat combinedImage;
-	hconcat(image, filterImage, combinedImage); // Combine original and filtered images side by side
+	hconcat(image, displayImage, combinedImage);
 
 	imshow(imageName, combinedImage);
 	waitKey(0);
@@ -152,15 +147,15 @@ void exercise5_ws3(const string& imagePath, const string& imageName) {
 	
 	Mat image = imread(imagePath, IMREAD_GRAYSCALE);
 	Mat paddedImage;
-	int pad = 3 / 2; // pad is equal to the kernel/2 
-	// Create a padded image
+	int pad = 3 / 2; // Kernel size / 2
 	copyMakeBorder(image, paddedImage, pad, pad, pad, pad, BORDER_CONSTANT);
 
-	// 1 channel image to serve as final reference
-	Mat filterImageHorizontal(image.rows, image.cols, CV_8UC1, Scalar(0));
-	Mat filterImageVertical(image.rows, image.cols, CV_8UC1, Scalar(0));
-	Mat filterImageMagnitude(image.rows, image.cols, CV_8UC1, Scalar(0));
+	// Intermediate matrices for Sobel filter results
+	Mat filterImageHorizontal(image.rows, image.cols, CV_32F, Scalar(0));
+	Mat filterImageVertical(image.rows, image.cols, CV_32F, Scalar(0));
+	Mat filterImageMagnitude(image.rows, image.cols, CV_32F, Scalar(0));
 
+	// Sobel kernels
 	float kernelx[3][3] = { {1, 0, -1},
 							{2, 0, -2},
 							{1, 0, -1} };
@@ -171,115 +166,132 @@ void exercise5_ws3(const string& imagePath, const string& imageName) {
 
 	for (int r = pad; r < paddedImage.rows - pad; r++) {
 		for (int c = pad; c < paddedImage.cols - pad; c++) {
+			float sum_x = 0, sum_y = 0; // Sums for both axes
 
-			int sum_x = 0, sum_y = 0; // sumn for both axis
-
-			for (int kx = -pad; kx <= pad; kx++) { // go through x 
-				for (int ky = -pad; ky <= pad; ky++) { // go through y
-					int pixel_value = paddedImage.at<uchar>(r + kx, c + ky);
+			for (int kx = -pad; kx <= pad; kx++) { // Kernel x
+				for (int ky = -pad; ky <= pad; ky++) { // Kernel y
+					float pixel_value = static_cast<float>(paddedImage.at<uchar>(r + kx, c + ky));
 					sum_x += pixel_value * kernelx[kx + pad][ky + pad];  // Convolution with Sobel X
 					sum_y += pixel_value * kernely[kx + pad][ky + pad];  // Convolution with Sobel Y
 				}
 			}
 
-			// Sobel x results / horizontal
-			filterImageHorizontal.at<uchar>(r - pad, c - pad) = static_cast<int>(round(float(sum_x)));
-			// Sobel x results / horizontal
-			filterImageVertical.at<uchar>(r - pad, c - pad) = static_cast<int>(round(float(sum_y)));
+			// Sobel results
+			filterImageHorizontal.at<float>(r - pad, c - pad) = sum_x;
+			filterImageVertical.at<float>(r - pad, c - pad) = sum_y;
 
-			// Combine Sobel X and Y results
-			int magnitude = sqrt(sum_x * sum_x + sum_y * sum_y);
-			filterImageMagnitude.at<uchar>(r - pad, c - pad) = static_cast<int>(round(magnitude));
+			// Magnitude (combined Sobel X and Y results)
+			float magnitude = sqrt(sum_x * sum_x + sum_y * sum_y);
+			filterImageMagnitude.at<float>(r - pad, c - pad) = magnitude;
 		}
 	}
-	
-	// low pass filter
+
+	// Low-pass filter results
 	Mat lowPassSobelHorizontal = lowpassFilter(image, filterImageHorizontal, pad);
 	Mat lowPassSobelVertical = lowpassFilter(image, filterImageVertical, pad);
 	Mat lowPassSobelMagnitude = lowpassFilter(image, filterImageMagnitude, pad);
 
+	// Normalize low-pass results for visualization
+	Mat lowPassHorizontalDisplay, lowPassVerticalDisplay, lowPassMagnitudeDisplay;
+	normalize(lowPassSobelHorizontal, lowPassHorizontalDisplay, 0, 255, NORM_MINMAX, CV_8UC1);
+	normalize(lowPassSobelVertical, lowPassVerticalDisplay, 0, 255, NORM_MINMAX, CV_8UC1);
+	normalize(lowPassSobelMagnitude, lowPassMagnitudeDisplay, 0, 255, NORM_MINMAX, CV_8UC1);
+
 	// Combine images for visualization
-	Mat combinedImage;
-	Mat combinedImage2;
-	Mat combinedImage3;
-
-	hconcat(image, lowPassSobelHorizontal, combinedImage);
-	hconcat(combinedImage, lowPassSobelVertical, combinedImage2);
-	hconcat(combinedImage2, lowPassSobelMagnitude, combinedImage3);
-
+	Mat combinedImage, combinedImage2, combinedImage3;
+	hconcat(image, lowPassHorizontalDisplay, combinedImage);
+	hconcat(combinedImage, lowPassVerticalDisplay, combinedImage2);
+	hconcat(combinedImage2, lowPassMagnitudeDisplay, combinedImage3);
+	
+	// Add labels to indentify each section
+	putText(combinedImage3, "Original", Point(50, 50), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 255, 255), 2);
+	putText(combinedImage3, "Horizontal", Point(450, 50), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 255, 255), 2);
+	putText(combinedImage3, "Vertical", Point(800, 50), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 255, 255), 2);
+	putText(combinedImage3, "Magnitude", Point(1100, 50), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 255, 255), 2);
 
 	// Display the final combined image
 	imshow(imageName, combinedImage3);
 	waitKey(0);
-
 }
 
 void exercise6_ws3(const string& imagePath, const string& imageName) {
-
 	Mat image = imread(imagePath, IMREAD_GRAYSCALE);
+	if (image.empty()) {
+		cerr << "Error: Image not found!" << endl;
+		return;
+	}
+
 	Mat paddedImage;
-	int pad = 3 / 2; // pad is equal to the kernel/2 
-	// Create a padded image
+	int pad = 3 / 2; // pad is equal to kernel/2
 	copyMakeBorder(image, paddedImage, pad, pad, pad, pad, BORDER_CONSTANT);
 
-	// 1 channel image to serve as final reference
-	Mat filterLaplace(image.rows, image.cols, CV_8UC1, Scalar(0));
+	// 1-channel image to serve as final reference
+	Mat filterLaplace(image.rows, image.cols, CV_32F, Scalar(0));
 
-	float kernel[3][3] = {	{0, 1, -1},
-							{1, -4, 1},
-							{0, 1, 0}};
+	// Laplacian kernel
+	float kernel[3][3] = {
+		{0, 1, 0},
+		{1, -4, 1},
+		{0, 1, 0}
+	};
 
 	for (int r = pad; r < paddedImage.rows - pad; r++) {
 		for (int c = pad; c < paddedImage.cols - pad; c++) {
+			float sum = 0.0f;
 
-			int sum = 0;
-
-			for (int kx = -pad; kx <= pad; kx++) { // go through x 
+			for (int kx = -pad; kx <= pad; kx++) { // go through x
 				for (int ky = -pad; ky <= pad; ky++) { // go through y
-					int pixel_value = paddedImage.at<uchar>(r + kx, c + ky);
-					sum += pixel_value * kernel[kx + pad][ky + pad];  // Convolution with Laplace
+					float pixel_value = static_cast<float>(paddedImage.at<uchar>(r + kx, c + ky));
+					sum += pixel_value * kernel[kx + pad][ky + pad]; // Convolution with Laplace
 				}
 			}
 
-			// Laplace result
-			filterLaplace.at<uchar>(r - pad, c - pad) = static_cast<int>(round(float(sum)));
+			filterLaplace.at<float>(r - pad, c - pad) = sum;
 		}
 	}
 
-	// low pass filter
+	// Low-pass filter
 	Mat lowPassLaplace = lowpassFilter(image, filterLaplace, pad);
 
+	// Normalize for display
+	Mat filterLaplaceDisplay, lowPassLaplaceDisplay;
+	normalize(filterLaplace, filterLaplaceDisplay, 0, 255, NORM_MINMAX, CV_8UC1);
+	normalize(lowPassLaplace, lowPassLaplaceDisplay, 0, 255, NORM_MINMAX, CV_8UC1);
+
 	// Combine images for visualization
-	Mat combinedImage;
-	Mat combinedImage2;
-	hconcat(image, filterLaplace, combinedImage);
-	hconcat(combinedImage, lowPassLaplace, combinedImage2);
+	Mat combinedImage, combinedImage2;
+	hconcat(image, filterLaplaceDisplay, combinedImage);
+	hconcat(combinedImage, lowPassLaplaceDisplay, combinedImage2);
+
+	// Add labels to indentify each section
+	putText(combinedImage2, "Original", Point(50, 50), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 255, 255), 2);
+	putText(combinedImage2, "Laplace", Point(450, 50), FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 255, 255), 2);
+	putText(combinedImage2, "Low pass", Point(800, 50), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 0), 2);
 
 	// Display the final combined image
 	imshow(imageName, combinedImage2);
 	waitKey(0);
 }
 
-Mat lowpassFilter(Mat& orignalImage, Mat& filteredImage, int pad) {
-
-	// Apply a low-pass filter to the horizontal Sobel output
+Mat lowpassFilter(Mat& originalImage, Mat& filteredImage, int pad) {
 	Mat paddedImage;
-	Mat lowPass(orignalImage.rows, orignalImage.cols, CV_8UC1, Scalar(0));
+	Mat lowPass(originalImage.rows, originalImage.cols, CV_32F, Scalar(0));
 	copyMakeBorder(filteredImage, paddedImage, pad, pad, pad, pad, BORDER_CONSTANT, Scalar(0));
 
 	for (int r = pad; r < paddedImage.rows - pad; r++) {
 		for (int c = pad; c < paddedImage.cols - pad; c++) {
-			int sum = 0;
+			float sum = 0.0f;
 
 			for (int kx = -pad; kx <= pad; kx++) {
 				for (int ky = -pad; ky <= pad; ky++) {
-					sum += paddedImage.at<uchar>(r + kx, c + ky);
+					sum += paddedImage.at<float>(r + kx, c + ky);
 				}
 			}
 
 			// Average the kernel values
-			lowPass.at<uchar>(r - pad, c - pad) = saturate_cast<uchar>(sum / (3 * 3));
+			lowPass.at<float>(r - pad, c - pad) = sum / (3 * 3);
 		}
 	}
+
 	return lowPass;
 }

@@ -3,10 +3,10 @@
 void wsHub() {
 	int userInputValue = 0;
 	while (1) {
-		cout << "Choose a worksheet number: " << endl;
+		cout << "Choose a worksheet number:" << endl;
+		cout << "(available: WS1 -> 1 / WS2 -> 2 / WS -> 3 / WS -> 4)" << endl;
 		cin >> userInputValue;
 		system("cls");
-
 		switch(userInputValue) {
 		case 1: //ws1
 			cout << "WS1!" << endl;
@@ -16,6 +16,16 @@ void wsHub() {
 		case 2: //ws2
 			cout << "WS2!" << endl;
 			ws2hub();
+			system("cls");
+			break;
+		case 3: //ws2
+			cout << "WS3!" << endl;
+			ws3hub();
+			system("cls");
+			break;
+		case 4:
+			cout << "WS4!" << endl;
+			ws4hub();
 			system("cls");
 			break;
 		default:
@@ -80,10 +90,11 @@ void ws1hub() {
 
 void ws2hub() {
 	int userInputValue = 0, imageTypeChoice = 0, userChoice = 0, bright_choice = 0;
+	String imageName, maskName;
 	float contrast_choice = 0;
 	while (1) {
 		switch (userInputValue) {
-		case 0:
+		case 10:
 			cout << "1. Greyscale image of a channel. (Retina.tif)" << endl;
 			cout << "2. Remove a channel from an image.(Retina.tif)" << endl;
 			cout << "3. Convert an image from RGB to Greyscale.(Retina.tif)" << endl;
@@ -99,36 +110,47 @@ void ws2hub() {
 		case 1:
 			cout << "Choose channel: (0 => B / 1 => G / 2 => R)" << endl;
 			cin >> userChoice;
-			exercise1_ws2(userChoice);
-			userInputValue = 0;
+			imageName = "Retina.tif";
+			exercise1_ws2(imageName, userChoice);
+			userInputValue = 10;
 			system("cls");
 			break;
 		case 2:
 			cout << "Choose a channel: (0 => B / 1 => G / 2 => R)" << endl;
 			cin >> userChoice;
-			exercise2_ws2(userChoice);
-			userInputValue = 0;
+			imageName = "Retina.tif";
+			exercise2_ws2(imageName, userChoice);
+			userInputValue = 10;
 			system("cls");
 			break;
 		case 3:
 			cout << "Choose an option: (Normal => 0 / Weighted => 1)" << endl;
 			cin >> userChoice;
-			exercise3_ws2(userChoice);
-			userInputValue = 0;	
+			imageName = "Retina.tif";
+			exercise3_ws2(imageName, userChoice);
+			userInputValue = 10;	
 			system("cls");
 			break;
 		case 4:
 			cout << "Choose image: (Retina => 0 / Breast => 1)" << endl;
 			cin >> userChoice;
-			exercise4_ws2(userChoice);
-			userInputValue = 0;
+			if (userChoice != 0) imageName = "breast_image.png";
+			else imageName = "Retina.tif";
+			exercise4_ws2(imageName);
+			userInputValue = 10;
 			system("cls");
 			break;
 		case 5:
 			cout << "Choose image: (Retina => 0 / Breast => 1)" << endl;
 			cin >> userChoice;
-			exercise5_ws2(userChoice);
-			userInputValue = 0;
+			if (userChoice != 0)
+			{
+				imageName = "breast_image.png";
+				maskName = "breast_mask.png";
+			}
+			else imageName = "Retina.tif";
+			exercise5_ws2(imageName, maskName);
+			userInputValue = 10;
 			system("cls");
 			break;
 		case 6:
@@ -136,30 +158,180 @@ void ws2hub() {
 			cin >> userChoice;
 			cout << "Choose the value of b: " << endl;
 			cin >> bright_choice;
-			exercise6_ws2(userChoice, bright_choice);
-			userInputValue = 0;
+			imageName = "breast_image.png";
+			exercise6_ws2(imageName, userChoice, bright_choice);
+			userInputValue = 10;
 			system("cls");
 			break;
 		case 7:
 			cout << "Choose the value of alpha: (contrast)" << endl;
 			cin >> contrast_choice;
-			if(contrast_choice != 0 && contrast_choice != 1) exercise7_ws2(contrast_choice);
+			imageName = "breast_image.png";
+			if(contrast_choice != 0 && contrast_choice != 1) exercise7_ws2(imageName, contrast_choice);
 			else cout << "Value cant be 0 or 1." << endl;
-			userInputValue = 0;
+			userInputValue = 10;
 			system("cls");
 			break;
 		case 8:
 			cout << "Choose an option: (Normal => 0 / Brigthness example => 1 / Contrast Example => 2)" << endl;
 			cin >> userChoice;
-			exercise8_ws2(userChoice);
-			userInputValue = 0;
+			userInputValue = 10;
 			system("cls");
 			break;
 
 		default:
-			userInputValue = 0; //go back to main submenu
+			userInputValue = 10; //go back to main submenu
 			system("cls");
 			break;
 		}
 	}
 }
+
+void ws3hub() {
+	int userInputValue = 0, imageChoice = 0, userChoice = 0, userChoice2 = 0, bright_choice = 0;
+	float contrast_choice = 0;
+	String imagePath, imageName;
+	Mat Gauss;
+	while (1) {
+		switch (userInputValue) {
+		case 10:
+			cout << "1. Average filter to remove noise." << endl;
+			cout << "2. Median filter to remove noise." << endl;
+			cout << "3. Create a gaussian kernel." << endl;
+			cout << "4. Convolution with gaussian kernel." << endl;
+			cout << "5. Convolution with Sobel kernel." << endl;
+			cout << "6. Convolution with Laplace kernel." << endl;
+			cout << "Press 0 to go back!" << endl;
+			cin >> userInputValue;
+			if (userInputValue != 0) break;
+			else wsHub();
+		case 1:
+			cout << "Choose image: (head_gaussian_noise => 0 / head_saltpepper_noise => 1)" << endl;
+			cin >> imageChoice;
+			if (imageChoice != 0){
+				imagePath = "J:/MEEC/PIVC/Projects/Project_PIVC_Worksheets/head_saltpepper_noise.png";
+				imageName = "Salt and Pepper Noise Filtering";
+			}
+			else{
+				imagePath = "J:/MEEC/PIVC/Projects/Project_PIVC_Worksheets/head_gaussian_noise.png";
+				imageName = "Gaussian Noise Filtering";
+			}
+				cout << "Choose kernel size: " << endl;
+			cin >> userChoice;
+			exercise1_ws3(imagePath,imageName,userChoice);
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 2:
+			cout << "Choose image: (head_gaussian_noise => 0 / head_saltpepper_noise => 1)" << endl;
+			cin >> imageChoice;
+			if (imageChoice != 0) {
+				imagePath = "J:/MEEC/PIVC/Projects/Project_PIVC_Worksheets/head_saltpepper_noise.png";
+				imageName = "Salt and Pepper Noise Filtering";
+			}
+			else {
+				imagePath = "J:/MEEC/PIVC/Projects/Project_PIVC_Worksheets/head_gaussian_noise.png";
+				imageName = "Gaussian Noise Filtering";
+			}
+				cout << "Choose kernel size: " << endl;
+			cin >> userChoice;
+			exercise2_ws3(imagePath, imageName, userChoice);
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 3:
+			cout << "Choose kernel size:" << endl;
+			cin >> userChoice;
+			// must be odd
+			if (userChoice % 2 && userChoice >= 1) {
+				cout << "Choose sigma value:" << endl;
+				cin >> userChoice2;
+				Gauss = exercise3_ws3(userChoice, userChoice2);
+				cout << "Gaussian Kernel:" << Gauss << endl;
+				cout << "Press any number to go back." << endl;
+				cin >> userChoice; // program gets stuck to allow the kernel print
+			}
+			else {
+				cout << "Must be an odd number and higher than 1." << endl;
+				cout << "Press any number to go back." << Gauss << endl;
+				cin >> userChoice; // program gets stuck to warn the user
+			}
+			
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 4:
+			cout << "Choose kernel size:" << endl;
+			cin >> userChoice;
+			// must be odd
+			if (userChoice % 2 && userChoice >= 1) {
+				cout << "Choose sigma value:" << endl;
+				cin >> userChoice2;
+				imagePath = "J:/MEEC/PIVC/Projects/Project_PIVC_Worksheets/head_gaussian_noise.png";
+				imageName = "Gaussian Noise Filtering";
+				Gauss = exercise3_ws3(userChoice, userChoice2);
+				cout << "Gaussian Kernel:\n" << Gauss << "\n";
+				exercise4_ws3(imagePath, imageName, Gauss, userChoice);
+			}
+			else {
+				cout << "Must be an odd number and higher than 1." << endl;
+				cout << "Press any number to go back." << Gauss << endl;
+				cin >> userChoice; // program gets stuck to warn the user
+			}
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 5:
+			imagePath = "J:/MEEC/PIVC/Projects/Project_PIVC_Worksheets/head_clean.png";
+			imageName = "Sobel Filtering";
+			exercise5_ws3(imagePath, imageName);
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 6:
+			imagePath = "J:/MEEC/PIVC/Projects/Project_PIVC_Worksheets/head_clean.png";
+			imageName = "Laplace Filtering";
+			exercise6_ws3(imagePath, imageName);
+			userInputValue = 10;
+			system("cls");
+			break;
+		default:
+			userInputValue = 10; //go back to main submenu
+			system("cls");
+			break;
+		}
+	}
+}
+
+void ws4hub() {
+	int userInputValue = 0, imageChoice = 0, userChoice = 0, userChoice2 = 0, bright_choice = 0;
+	float contrast_choice = 0;
+	String imagePath, imageName;
+	while (1) {
+		switch (userInputValue) {
+		case 10:
+			cout << "1. BinaryImg.png to BinaryImg_processed.png." << endl;
+			cout << "2. ." << endl;
+			cout << "3. ." << endl;
+			cout << "4. ." << endl;
+			cout << "5. ." << endl;
+			cout << "5. ." << endl;
+			cout << "Press 0 to go back!" << endl;
+			cin >> userInputValue;
+			if (userInputValue != 0) break;
+			else wsHub();
+		case 1:
+			imagePath = "J:/MEEC/PIVC/Projects/Project_PIVC_Worksheets/BinaryImg.png";
+			imageName = "Binary Image";
+			exercise1_ws4(imagePath, imageName);
+			userInputValue = 10;
+			system("cls");
+			break;
+		default:
+			userInputValue = 10; //go back to main submenu
+			system("cls");
+			break;
+		}
+	}
+}
+
