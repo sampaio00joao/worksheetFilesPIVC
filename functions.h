@@ -44,4 +44,8 @@ Mat dilate(Mat& image, Mat structuringElement);
 Mat erode(Mat& image, Mat structuringElement);
 Mat closing(Mat& image, Mat structuringElement);
 Mat opening(Mat& image, Mat structuringElement);
+Mat structuringElement(int size, int type);
 void exercise1_ws4(const string& imagePath, const string& imageName);
+void exercise2_ws4(const string& imagePath, const string& imageName, Mat structuringElement);
+void exercise4_ws4(const string& imagePath, const string& imageName, Mat structuringElement);
+void exercise5_ws4(const string& imagePath, const string& imageName);

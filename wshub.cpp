@@ -304,18 +304,18 @@ void ws3hub() {
 }
 
 void ws4hub() {
-	int userInputValue = 0, imageChoice = 0, userChoice = 0, userChoice2 = 0, bright_choice = 0;
-	float contrast_choice = 0;
+	int userInputValue = 0, imageChoice = 0, userChoice = 0, 
+		userChoice2 = 0, structElementSize = 0, structElementType = 0;
 	String imagePath, imageName;
+	Mat Gauss, structElement, structElement2;
 	while (1) {
 		switch (userInputValue) {
 		case 10:
-			cout << "1. BinaryImg.png to BinaryImg_processed.png." << endl;
-			cout << "2. ." << endl;
-			cout << "3. ." << endl;
-			cout << "4. ." << endl;
-			cout << "5. ." << endl;
-			cout << "5. ." << endl;
+			cout << "1. From BinaryImg.png to BinaryImg_processed.png." << endl;
+			cout << "2. Smooth the image head_gaussian_noise.png." << endl;
+			cout << "3. Sobel filter to detect the outlines." << endl;
+			cout << "4. Mathematical morphology to detect outlines." << endl;
+			cout << "5. Segmentation of kidney.png." << endl;
 			cout << "Press 0 to go back!" << endl;
 			cin >> userInputValue;
 			if (userInputValue != 0) break;
@@ -324,6 +324,68 @@ void ws4hub() {
 			imagePath = "J:/MEEC/PIVC/Projects/Project_PIVC_Worksheets/BinaryImg.png";
 			imageName = "Binary Image";
 			exercise1_ws4(imagePath, imageName);
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 2:
+			imagePath = "head_gaussian_noise.png";
+			imageName = "Smoothed Image";
+			cout << "Structuring element size: " << endl;
+			cin >> structElementSize;
+			cout << "Structuring element type: " << endl;
+			cout << "(0 -> Rectangle / 1 -> Ellipse)" << endl;
+			cin >> structElementType;
+			structElement = structuringElement(structElementSize, structElementType);
+			exercise2_ws4(imagePath, imageName, structElement);
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 3:
+			cout << "Choose an image:" << endl;
+			cout << "(0 -> 3x3 / 1 -> 5x5 / 2-> 9x9)" << endl;
+			cin >> imageChoice;
+			if (imageChoice == 0) {
+				imagePath = "head_gaussian_smooth_3x3.png";
+			}
+			else if (imageChoice == 1) {
+				imagePath = "head_gaussian_smooth_5x5.png";
+			}
+			else if (imageChoice == 2) {
+				imagePath = "head_gaussian_smooth_9x9.png";
+			}
+			imageName = "Gaussian Noise Filtering";
+			exercise5_ws3(imagePath, imageName);
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 4:
+			cout << "Choose an image:" << endl;
+			cout << "(0 -> 3x3 / 1 -> 5x5 / 2-> 9x9)" << endl;
+			cin >> imageChoice;
+			if (imageChoice == 0) {
+				imagePath = "head_gaussian_smooth_3x3.png";
+			}
+			else if (imageChoice == 1) {
+				imagePath = "head_gaussian_smooth_5x5.png";
+			}
+			else if (imageChoice == 2) {
+				imagePath = "head_gaussian_smooth_9x9.png";
+			}
+			imageName = "Morphology Outlines Image";
+			cout << "Structuring element size: (outline) " << endl;
+			cin >> structElementSize;
+			cout << "Structuring element type: (outline)" << endl;
+			cout << "(0 -> Rectangle / 1 -> Ellipse / 2 -> Cross)" << endl;
+			cin >> structElementType;
+			structElement = structuringElement(structElementSize, structElementType);
+			exercise4_ws4(imagePath, imageName, structElement);
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 5:
+			imagePath = "kidney.png";
+			imageName = "Pipeline Kidney Image";
+			exercise5_ws4(imagePath, imageName);
 			userInputValue = 10;
 			system("cls");
 			break;
