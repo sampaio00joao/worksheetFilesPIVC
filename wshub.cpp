@@ -5,6 +5,7 @@ void wsHub() {
 	while (1) {
 		cout << "Choose a worksheet number:" << endl;
 		cout << "(available: WS1 -> 1 / WS2 -> 2 / WS -> 3 / WS -> 4)" << endl;
+		cout << "(WS5 -> 5 )" << endl;
 		cin >> userInputValue;
 		system("cls");
 		switch(userInputValue) {
@@ -26,6 +27,11 @@ void wsHub() {
 		case 4:
 			cout << "WS4!" << endl;
 			ws4hub();
+			system("cls");
+			break;
+		case 5:
+			cout << "WS5!" << endl;
+			ws5hub();
 			system("cls");
 			break;
 		default:
@@ -397,3 +403,87 @@ void ws4hub() {
 	}
 }
 
+void ws5hub() {
+	int userInputValue = 0, imageChoice = 0, userChoice = 0,
+		userChoice2 = 0, structElementSize = 0, structElementType = 0;
+	String imagePath, imageName;
+	Mat Gauss, structElement, structElement2, image;
+	while (1) {
+		switch (userInputValue) {
+		case 10:
+			cout << "1. Segmentation of an image." << endl;
+			cout << "2. Image labelling." << endl;
+			cout << "3. Kidney pipeline." << endl;
+			cout << "4. Same as WS3 with side detection and 0.8mm spacing." << endl;
+			cout << "5. Pipeline evaluation." << endl;
+			cout << "Press 0 to go back!" << endl;
+			cin >> userInputValue;
+			if (userInputValue != 0) break;
+			else wsHub();
+		case 1:
+			imagePath = "beans.png";
+			imageName = "Beans Segmentation Image";
+			cout << "Select the threshold method: " << endl;
+			cout << "(0 -> Manual / 1 -> Mean / 2 -> Otsu / 3 -> Adaptative)" << endl;
+			cin >> userChoice;
+			switch (userChoice) {
+			case 0:
+				exercise1_ws5(imagePath, imageName, "manual");
+				break;
+			case 1:
+				exercise1_ws5(imagePath, imageName, "mean");
+				break;
+			case 2:
+				exercise1_ws5(imagePath, imageName, "otsu");
+				break;
+			case 3:
+				exercise1_ws5(imagePath, imageName, "adaptative");
+				break;
+			}
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 2:
+			exercise2_ws5();
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 3:
+			exercise3_ws5();
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 4:
+			exercise3_ws5();
+			userInputValue = 10;
+			system("cls");
+			break;
+		case 5:
+			imageName = "Pipeline Evaluation Images";
+			cout << "Choose an image: (ws5_exe3 -> 0 / ws4_exe5 -> 1 / bad_example -> 2)" << endl;
+			cin >> userChoice;
+			if (userChoice == 0) {
+				Mat image = imread("kidney_pipeline_ws5.png", IMREAD_GRAYSCALE);
+				Mat refImage = imread("kidney_segmented.png", IMREAD_GRAYSCALE);
+				exercise5_ws5(imageName, image, refImage);
+			}
+			else if (userChoice == 1) {
+				Mat image = imread("kidney_pipeline_ws4.png", IMREAD_GRAYSCALE);
+				Mat refImage = imread("kidney_segmented.png", IMREAD_GRAYSCALE);
+				exercise5_ws5(imageName, image, refImage);
+			}
+			else if (userChoice == 2) {
+				Mat image = imread("kidney_bad_example.png", IMREAD_GRAYSCALE);
+				Mat refImage = imread("kidney_segmented.png", IMREAD_GRAYSCALE);
+				exercise5_ws5(imageName, image, refImage);
+			}
+			userInputValue = 10;
+			system("cls");
+			break;
+		default:
+			userInputValue = 10; //go back to main submenu
+			system("cls");
+			break;
+		}
+	}
+}

@@ -11,6 +11,7 @@ void ws1hub();
 void ws2hub();
 void ws3hub();
 void ws4hub();
+void ws5hub();
 
 //ws1
 void exercise_makeImage_ws1();
@@ -40,8 +41,8 @@ Mat lowpassFilter(Mat& orignalImage, Mat& filteredImage, int pad);
 
 //ws4
 
-Mat dilate(Mat& image, Mat structuringElement);
-Mat erode(Mat& image, Mat structuringElement);
+Mat dilation(Mat& image, Mat structuringElement);
+Mat erosion(Mat& image, Mat structuringElement);
 Mat closing(Mat& image, Mat structuringElement);
 Mat opening(Mat& image, Mat structuringElement);
 Mat structuringElement(int size, int type);
@@ -49,3 +50,11 @@ void exercise1_ws4(const string& imagePath, const string& imageName);
 void exercise2_ws4(const string& imagePath, const string& imageName, Mat structuringElement);
 void exercise4_ws4(const string& imagePath, const string& imageName, Mat structuringElement);
 void exercise5_ws4(const string& imagePath, const string& imageName);
+
+//ws5
+Mat thresholdMethods(const string& imagePath, string method, string mode);
+Mat imageLabelling(Mat& image, int areaValue, string ws4Flag);
+void exercise1_ws5(const string& imagePath, const string& imageName, string method);
+void exercise2_ws5();
+void exercise3_ws5();
+void exercise5_ws5(const string& imageName, Mat& imageOutput, Mat& imageReference);
